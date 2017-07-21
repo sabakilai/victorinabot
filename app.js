@@ -66,7 +66,7 @@ app.use(function(err, req, res, next) {
 });
 setInterval(function() {
     console.log("Dont sleep!");
-    http.get("http://horoscopebotkg.herokuapp.com");
+    http.get("https://victorinakg.herokuapp.com/");
 }, 300000); // every 5 minutes (300000)
 
 module.exports = app;

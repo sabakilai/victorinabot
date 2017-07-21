@@ -101,14 +101,16 @@ router.post("/", function(req, res, next) {
           var errMessage = "Некорректный ввод. " + allComands();
           if(content == "Играть"){
             var message = 'Игра началась!'
-            var question = getQuestion(randomId([]));
-            db.update({game: true, lastQuest:question.id , numQuest:1}, {where: {userId: userId}}).then(function(user) {
-              sms(message,chatId,ip,function () {
-                setTimeout(function () {
-                  sms(question.question+"\na) "+question.w_answer_1+"\nb) "+question.w_answer_2+"\nc) "+question.w_answer_3+"\nd) "+question.r_answer, chatId, ip);
-                },2000)
+            getQuestion(randomId([])).then((question)=>{
+              console.log(question);
+              db.update({game: true, lastQuest:question.id , numQuest:1}, {where: {userId: userId}}).then(function(user) {
+                sms(message,chatId,ip,function () {
+                  setTimeout(function () {
+                    sms(question.question+"\na) "+question.w_answer_1+"\nb) "+question.w_answer_2+"\nc) "+question.w_answer_3+"\nd) "+question.r_answer, chatId, ip);
+                  },2000)
+                })
               })
-            })
+            });
           }
           else if (content == "Помощь") {
             sms("FAQ", chatId, ip);
