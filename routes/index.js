@@ -65,7 +65,7 @@ router.post("/", function(req, res, next) {
       	}
         if (user.game){
           var r_answer = getQuestion(lastQuest).then((lastQuestion)=>{
-            if (content == r_answer) {
+            if (content == lastQuestion.r_answer) {
               var message = "Ответ верный! Вы заработали N монет";
               getQuestion(randomId([])).then((question)=>{
                 db.update({lastQuest:question.id , numQuest:numQuest+1}, {where: {userId: userId}}).then((user)=>{
