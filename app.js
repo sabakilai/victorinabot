@@ -12,7 +12,6 @@ var async = require('async');
 var sms = require("./models/sms.js");
 var newChat = require("./models/newchat.js");
 var CronJob = require('cron').CronJob;
-let parser = require('./libs/parser');
 var app = express();
 
 
