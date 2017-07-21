@@ -67,25 +67,27 @@ router.post("/", function(req, res, next) {
           var r_answer = getQuestion(lastQuest).r_answer;
           if (content == r_answer) {
             var message = "Ответ верный! Вы заработали N монет";
-            var question = getQuestion(randomId([]));
-            db.update({lastQuest:question.id , numQuest:numQuest+1}, {where: {userId: userId}}).then((user)=>{
-              sms(message, chatId, ip,function () {
-                setTimeout(function () {
-                  sms(question.question+"\na) "+question.w_answer_1+"\nb) "+question.w_answer_2+"\nc) "+question.w_answer_3+"\nd) "+question.r_answer, chatId, ip);
-                },2000)
-              });
-            })
-          } else {
-            if (chance) {
-              var message = "Ответ не верный, но ты можешь ошибиться один раз за игру."
-              var question = getQuestion(lastQuest);
-              db.update({lastQuest:lastQuest, numQuest:numQuest, chance:false}, {where: {userId: userId}}).then((user)=>{
+            getQuestion(randomId([])).then((question)=>{
+              db.update({lastQuest:question.id , numQuest:numQuest+1}, {where: {userId: userId}}).then((user)=>{
                 sms(message, chatId, ip,function () {
                   setTimeout(function () {
-                    sms(question.question+"\na) "+question.w_answer_1+"\nb) "+question.w_answer_2+"\nc) "+question.w_answer_3+"\nd) "+question.r_answer, chatId, ip);
+                    sms(question.question+"\na) "+question.w_answer1+"\nb) "+question.w_answer2+"\nc) "+question.w_answer3+"\nd) "+question.r_answer, chatId, ip);
                   },2000)
                 });
               })
+            });
+          } else {
+            if (chance) {
+              var message = "Ответ не верный, но ты можешь ошибиться один раз за игру."
+              getQuestion(lastQuest).then((question)=>{
+                db.update({lastQuest:lastQuest, numQuest:numQuest, chance:false}, {where: {userId: userId}}).then((user)=>{
+                  sms(message, chatId, ip,function () {
+                    setTimeout(function () {
+                      sms(question.question+"\na) "+question.w_answer1+"\nb) "+question.w_answer2+"\nc) "+question.w_answer3+"\nd) "+question.r_answer, chatId, ip);
+                    },2000)
+                  });
+                })
+              });
             } else {
               var message = "Ответ не верный. Ты проиграл."
               db.update({lastQuest:0, numQuest:0, chance:true, game:false}, {where: {userId: userId}}).then((user)=>{
@@ -106,7 +108,7 @@ router.post("/", function(req, res, next) {
               db.update({game: true, lastQuest:question.id , numQuest:1}, {where: {userId: userId}}).then(function(user) {
                 sms(message,chatId,ip,function () {
                   setTimeout(function () {
-                    sms(question.question+"\na) "+question.w_answer_1+"\nb) "+question.w_answer_2+"\nc) "+question.w_answer_3+"\nd) "+question.r_answer, chatId, ip);
+                    sms(question.question+"\na) "+question.w_answer1+"\nb) "+question.w_answer2+"\nc) "+question.w_answer3+"\nd) "+question.r_answer, chatId, ip);
                   },2000)
                 })
               })

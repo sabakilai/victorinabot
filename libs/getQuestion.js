@@ -17,7 +17,6 @@ module.exports = function (id) {
           if (!data){
             reject('Error saving!')
           }
-          console.log(data);
           resolve(data);
       });
     });
