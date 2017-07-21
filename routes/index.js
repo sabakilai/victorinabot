@@ -19,7 +19,7 @@ router.post("/", function(req, res, next) {
   var ip = req.connection.remoteAddress;
     var event = req.body.event;
 
-    var randomId(arr) {
+    var randomId = function (arr) {
       var x = Math.floor((Math.random() * 2630) + 1);;
       while (arr.indexOf(x)>-1) {
         x = Math.floor((Math.random() * 2630) + 1);
