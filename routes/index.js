@@ -27,7 +27,7 @@ router.post("/", function(req, res, next) {
       return x;
     }
 
-    var function shuffle(array) {
+    var shuffle = function (array) {
       var currentIndex = array.length, temporaryValue, randomIndex;
       var rightAnswer = array[3];
       var indexRight;
