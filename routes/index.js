@@ -27,6 +27,24 @@ router.post("/", function(req, res, next) {
       return x;
     }
 
+    var function shuffle(array) {
+      var currentIndex = array.length, temporaryValue, randomIndex;
+      var rightAnswer = array[3];
+      var indexRight;
+      while (0 !== currentIndex) {
+
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+      indexRight = array.indexOf(rightAnswer);
+
+      return {array:array,index:indexRight};
+    }
+
     var allComands = function () {
       return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Помощь' - инфо по игре.\n'Статистика' - позиция в игре.\n'Топ' - топ игроков."
     }
@@ -57,6 +75,7 @@ router.post("/", function(req, res, next) {
         var lastQuest = user.lastQuest;
         var numQuest = user.numQuest;
         var chance = user.chance;
+        var rightAnswer = user.rightAnswer;
         //var askedQuest = user.askedQuest;
       	if(req.body.data.type != 'text/plain') {
       		console.log(errMessage);
@@ -64,14 +83,23 @@ router.post("/", function(req, res, next) {
       		return;
       	}
         if (user.game){
-          var r_answer = getQuestion(lastQuest).then((lastQuestion)=>{
-            if (content == lastQuestion.r_answer) {
+          var correctAnswer = ["A","a","B","b","C","c","D","d"];
+          if (correctAnswer.indexOf(content)>= 0) {
+            var answerApplied;
+            switch(content) {
+                case 'A': case 'a': answerApplied = 0; break;
+                case 'B': case 'b': answerApplied = 1; break;
+                case 'C': case 'c': answerApplied = 2; break;
+                case 'D': case 'd': answerApplied = 3; break;
+            }
+            if (answerApplied == rightAnswer) {
               var message = "Ответ верный! Вы заработали N монет";
               getQuestion(randomId([])).then((question)=>{
-                db.update({lastQuest:question.id , numQuest:numQuest+1}, {where: {userId: userId}}).then((user)=>{
+                var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
+                db.update({lastQuest:question.id ,rightAnswer:answers.index, numQuest:numQuest+1}, {where: {userId: userId}}).then((user)=>{
                   sms(message, chatId, ip,function () {
                     setTimeout(function () {
-                      sms(question.question+"\na) "+question.w_answer1+"\nb) "+question.w_answer2+"\nc) "+question.w_answer3+"\nd) "+question.r_answer, chatId, ip);
+                      sms(question.question+"\na) "+answers.array[0]+"\nb) "+answers.array[1]+"\nc) "+answers.array[2]+"\nd) "+answers.array[3], chatId, ip);
                     },2000)
                   });
                 })
@@ -79,18 +107,19 @@ router.post("/", function(req, res, next) {
             } else {
               if (chance) {
                 var message = "Ответ не верный, но ты можешь ошибиться один раз за игру."
-                getQuestion(lastQuest).then((question)=>{
-                  db.update({lastQuest:lastQuest, numQuest:numQuest, chance:false}, {where: {userId: userId}}).then((user)=>{
-                    sms(message, chatId, ip,function () {
-                      setTimeout(function () {
-                        sms(question.question+"\na) "+question.w_answer1+"\nb) "+question.w_answer2+"\nc) "+question.w_answer3+"\nd) "+question.r_answer, chatId, ip);
-                      },2000)
-                    });
+                //getQuestion(lastQuest).then((question)=>{
+                  db.update({chance:false}, {where: {userId: userId}}).then((user)=>{
+                    sms(message, chatId, ip)
+                      //,function () {
+                      //setTimeout(function () {
+                      //  sms(question.question+"\na) "+question.w_answer1+"\nb) "+question.w_answer2+"\nc) "+question.w_answer3+"\nd) "+question.r_answer, chatId, ip);
+                      //},2000)
+                    //});
                   })
-                });
+                //});
               } else {
                 var message = "Ответ не верный. Ты проиграл."
-                db.update({lastQuest:0, numQuest:0, chance:true, game:false}, {where: {userId: userId}}).then((user)=>{
+                db.update({ numQuest:0, chance:true, game:false}, {where: {userId: userId}}).then((user)=>{
                   sms(message,chatId,ip, function () {
                     setTimeout(function () {
                       sms(allComands(), chatId, ip);
@@ -99,17 +128,17 @@ router.post("/", function(req, res, next) {
                 })
               }
             }
-          });
+          }
         } else {
           var errMessage = "Некорректный ввод. " + allComands();
           if(content == "Играть"){
             var message = 'Игра началась!'
             getQuestion(randomId([])).then((question)=>{
-              console.log(question);
-              db.update({game: true, lastQuest:question.id , numQuest:1}, {where: {userId: userId}}).then(function(user) {
+              var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
+              db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1}, {where: {userId: userId}}).then(function(user) {
                 sms(message,chatId,ip,function () {
                   setTimeout(function () {
-                    sms(question.question+"\na) "+question.w_answer1+"\nb) "+question.w_answer2+"\nc) "+question.w_answer3+"\nd) "+question.r_answer, chatId, ip);
+                    sms(question.question+"\na) "+answers.array[0]+"\nb) "+answers.array[1]+"\nc) "+answers.array[2]+"\nd) "+answers.array[3], chatId, ip);
                   },2000)
                 })
               })

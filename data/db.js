@@ -18,6 +18,7 @@ var user = sequelize.define("user", {
 	},
 	lastQuest:Sequelize.INTEGER,
 	numQuest:Sequelize.INTEGER,
+	rightAnswer:sequelize.INTEGER,
 	chance: {
 		type: Sequelize.BOOLEAN,
 	    defaultValue: true
