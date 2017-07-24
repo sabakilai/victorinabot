@@ -76,6 +76,8 @@ router.post("/", function(req, res, next) {
         var numQuest = user.numQuest;
         var chance = user.chance;
         var rightAnswer = user.rightAnswer;
+        var coinsAll = user.coinsAll;
+        var coinsGame = user.coinsGame;
         //var askedQuest = user.askedQuest;
       	if(req.body.data.type != 'text/plain') {
       		console.log(errMessage);
@@ -93,33 +95,56 @@ router.post("/", function(req, res, next) {
                 case 'D': case 'd': answerApplied = 3; break;
             }
             if (answerApplied == rightAnswer) {
-              var message = "Ответ верный! Вы заработали N монет";
-              getQuestion(randomId([])).then((question)=>{
-                var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
-                db.update({lastQuest:question.id ,rightAnswer:answers.index, numQuest:numQuest+1}, {where: {userId: userId}}).then((user)=>{
+              var monets;
+              switch(numQuest) {
+                  case 1: monets = 5; break;
+                  case 2: monets = 10; break;
+                  case 3: monets = 15; break;
+                  case 4: monets = 30; break;
+                  case 5: monets = 50; break;
+                  case 6: monets = 75; break;
+                  case 7: monets = 100; break;
+                  case 8: monets = 150; break;
+                  case 9: monets = 200; break;
+                  case 10: monets = 300; break;
+                  case 11: monets = 400; break;
+                  case 12: monets = 500; break;
+              }
+              var message = "Ответ верный! Вы заработали " + monets + " монет";
+              var coins = coinsGame + monets;
+              if (numQuest == 12) {
+                db.update({numQuest:0, coinsGame:0, chance:true,game:false, coinsAll:coins}, {where: {userId: userId}}).then((user)=>{
                   sms(message, chatId, ip,function () {
                     setTimeout(function () {
-                      sms(question.question+"\na) "+answers.array[0]+"\nb) "+answers.array[1]+"\nc) "+answers.array[2]+"\nd) "+answers.array[3], chatId, ip);
+                      sms("Вы выиграли! За эту игру Вы заработали " + coins + " монет.", chatId, ip, function () {
+                        setTimeout(function () {
+                          sms(allComands(), chatId, ip);
+                        },2000)
+                      });
                     },2000)
                   });
                 })
-              });
+              } else {
+                getQuestion(randomId([])).then((question)=>{
+                  var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
+                  db.update({lastQuest:question.id ,rightAnswer:answers.index, numQuest:numQuest+1, coinsGame:coins}, {where: {userId: userId}}).then((user)=>{
+                    sms(message, chatId, ip,function () {
+                      setTimeout(function () {
+                        sms(question.question+"\na) "+answers.array[0]+"\nb) "+answers.array[1]+"\nc) "+answers.array[2]+"\nd) "+answers.array[3], chatId, ip);
+                      },2000)
+                    });
+                  })
+                });
+              }
             } else {
               if (chance) {
-                var message = "Ответ не верный, но ты можешь ошибиться один раз за игру."
-                //getQuestion(lastQuest).then((question)=>{
+                var message = "Ответ неверный, но Вы можете ошибиться один раз за игру."
                   db.update({chance:false}, {where: {userId: userId}}).then((user)=>{
                     sms(message, chatId, ip)
-                      //,function () {
-                      //setTimeout(function () {
-                      //  sms(question.question+"\na) "+question.w_answer1+"\nb) "+question.w_answer2+"\nc) "+question.w_answer3+"\nd) "+question.r_answer, chatId, ip);
-                      //},2000)
-                    //});
                   })
-                //});
               } else {
-                var message = "Ответ не верный. Ты проиграл."
-                db.update({ numQuest:0, chance:true, game:false}, {where: {userId: userId}}).then((user)=>{
+                var message = "Ответ неверный. Вы проиграли. За эту игру Вы заработали 0 монет."
+                db.update({ numQuest:0, chance:true, game:false, coinsGame:0}, {where: {userId: userId}}).then((user)=>{
                   sms(message,chatId,ip, function () {
                     setTimeout(function () {
                       sms(allComands(), chatId, ip);
