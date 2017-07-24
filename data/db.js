@@ -46,7 +46,7 @@ var user = sequelize.define("user", {
 	saveOption:{
 		type: Sequelize.BOOLEAN,
 	    defaultValue: true
-	}
+	},
 	numberGames:{
 		type: Sequelize.INTEGER,
 	    defaultValue: 0
