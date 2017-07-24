@@ -245,7 +245,11 @@ router.post("/", function(req, res, next) {
           else if (content == "Статистика"){
 
             sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8", { type: sequelize.QueryTypes.SELECT}).then((results)=>{
-              console.log(results);
+              for (var i = 0; i < results.length; i++) {
+                if (results[i].userId == userId) {
+                  console.log(results[i].i);
+                }
+              }
             })
             sms("Users stat", chatId, ip);
           } else {
