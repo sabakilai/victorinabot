@@ -244,7 +244,7 @@ router.post("/", function(req, res, next) {
           }
           else if (content == "Статистика"){
 
-            sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8").then((results)=>{
+            sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8", { type: sequelize.QueryTypes.SELECT}).then((results)=>{
               async.each(results, function(result,callback){
                 console.log('user - ' + result.user);
               })
