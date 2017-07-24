@@ -49,7 +49,7 @@ router.post("/", function(req, res, next) {
       return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Инфо' - FAQ по игре.\n'Статистика' - позиция в игре.\n'Топ' - топ игроков."
     }
     var gameCommands = function () {
-      return "'Помощь' - помощь эксперта, 'Сменить' - другой вопрос, 'Забрать' - выйти из игры с выйгранными монетами, 'Сохранить' - застраховать сумму"
+      return "'Помощь' - помощь эксперта \n'Сменить' - другой вопрос \n'Забрать' - выйти из игры с выйгранными монетами \n'Сохранить' - застраховать сумму"
     }
 
     if(event == "user/unfollow") {
@@ -125,7 +125,7 @@ router.post("/", function(req, res, next) {
                 getQuestion(randomId([])).then((question)=>{
                   var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
                   db.update({lastQuest:question.id ,rightAnswer:answers.index, anotherQuestion:false}, {where: {userId: userId}}).then((user)=>{
-                    sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
+                    sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3] + "\n" + gameCommands(), chatId, ip);
                   })
                 });
               } else {
@@ -191,7 +191,7 @@ router.post("/", function(req, res, next) {
                     db.update({lastQuest:question.id ,rightAnswer:answers.index, numQuest:numQuest+1, coinsGame:coins}, {where: {userId: userId}}).then((user)=>{
                       sms(message, chatId, ip,function () {
                         setTimeout(function () {
-                          sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
+                          sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3]+ "\n" + gameCommands(), chatId, ip);
                         },2000)
                       });
                     })
