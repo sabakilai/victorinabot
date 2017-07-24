@@ -6,6 +6,7 @@ var newChat = require("../models/newchat.js");
 var async = require('async');
 var router = express.Router();
 var pg = require('pg');
+var Sequelize = require("sequelize");
 let getQuestion = require('../libs/getQuestion');
 
 
@@ -239,10 +240,10 @@ router.post("/", function(req, res, next) {
             sms(rules(), chatId, ip);
           }
           else if (content == "Статистика"){
-            db.findAndCountAll({ order: '"coinsAll" DESC' }).then((results)=>{
+
+            sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8", { type: sequelize.QueryTypes.SELECT}).then((results)=>{
               async.each(results, function(result,callback){
-                console.log(result.count);
-                console.log(result.rows);
+                console.log(result.idea);
               })
             })
             sms("Users stat", chatId, ip);
