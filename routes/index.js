@@ -243,15 +243,14 @@ router.post("/", function(req, res, next) {
             sms(rules(), chatId, ip);
           }
           else if (content == "Статистика"){
-
             sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8", { type: sequelize.QueryTypes.SELECT}).then((results)=>{
               for (var i = 0; i < results.length; i++) {
                 if (results[i].userId == userId) {
-                  console.log(results[i].i);
+                  var message = "Ваша позиция: " + results[i].i + "\nКоличество монет: " + results[i].coinsAll
+                  sms(message,chatId, ip)
                 }
               }
             })
-            sms("Users stat", chatId, ip);
           } else {
       		sms(errMessage, chatId, ip);
           }
