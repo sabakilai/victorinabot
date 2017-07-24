@@ -115,11 +115,7 @@ router.post("/", function(req, res, next) {
                 getQuestion(randomId([])).then((question)=>{
                   var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
                   db.update({lastQuest:question.id ,rightAnswer:answers.index, anotherQuestion:false}, {where: {userId: userId}}).then((user)=>{
-                    sms(message, chatId, ip,function () {
-                      setTimeout(function () {
-                        sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
-                      },2000)
-                    });
+                    sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
                   })
                 });
               } else {
