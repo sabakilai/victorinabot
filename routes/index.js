@@ -6,9 +6,12 @@ var newChat = require("../models/newchat.js");
 var async = require('async');
 var router = express.Router();
 var pg = require('pg');
-var Sequelize = require("sequelize");
 let getQuestion = require('../libs/getQuestion');
-
+var Sequelize = require("sequelize");
+var sequelize = new Sequelize("ddg6gen02vnjki", "vibhiihldjoeks", "9838b357de38135b867180590c12619c41949bca0a39a866072fc16126d7e862", {
+	host: "ec2-23-21-220-48.compute-1.amazonaws.com",
+	dialect: "postgres"
+});
 
 
 /* GET home page. */
@@ -241,7 +244,7 @@ router.post("/", function(req, res, next) {
           }
           else if (content == "Статистика"){
 
-            db.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8").then((results)=>{
+            sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8").then((results)=>{
               async.each(results, function(result,callback){
                 console.log(result.idea);
               })
