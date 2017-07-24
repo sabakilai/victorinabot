@@ -30,6 +30,14 @@ var user = sequelize.define("user", {
 	coinsGame:{
 		type: Sequelize.INTEGER,
 	    defaultValue: 0
+	},
+	help:{
+		type: Sequelize.BOOLEAN,
+	    defaultValue: true
+	},
+	anotherQuestion:{
+		type: Sequelize.BOOLEAN,
+	    defaultValue: true
 	}
 })
 

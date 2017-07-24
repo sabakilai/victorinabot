@@ -46,7 +46,7 @@ router.post("/", function(req, res, next) {
     }
 
     var allComands = function () {
-      return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Помощь' - инфо по игре.\n'Статистика' - позиция в игре.\n'Топ' - топ игроков."
+      return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Инфо' - FAQ по игре.\n'Статистика' - позиция в игре.\n'Топ' - топ игроков."
     }
 
     if(event == "user/unfollow") {
@@ -78,6 +78,8 @@ router.post("/", function(req, res, next) {
         var rightAnswer = user.rightAnswer;
         var coinsAll = user.coinsAll;
         var coinsGame = user.coinsGame;
+        var help = user.help;
+        var anotherQuestion = user.anotherQuestion;
         //var askedQuest = user.askedQuest;
       	if(req.body.data.type != 'text/plain') {
       		console.log(errMessage);
@@ -85,72 +87,111 @@ router.post("/", function(req, res, next) {
       		return;
       	}
         if (user.game){
-          var correctAnswer = ["A","a","B","b","C","c","D","d"];
+          var correctAnswer = ["А","а","Б","б","В","в","Г","г", "Забрать", "Помощь", "Сменить"];
           if (correctAnswer.indexOf(content)>= 0) {
-            var answerApplied;
-            switch(content) {
-                case 'A': case 'a': answerApplied = 0; break;
-                case 'B': case 'b': answerApplied = 1; break;
-                case 'C': case 'c': answerApplied = 2; break;
-                case 'D': case 'd': answerApplied = 3; break;
-            }
-            if (answerApplied == rightAnswer) {
-              var monets;
-              switch(numQuest) {
-                  case 1: monets = 5; break;
-                  case 2: monets = 10; break;
-                  case 3: monets = 15; break;
-                  case 4: monets = 30; break;
-                  case 5: monets = 50; break;
-                  case 6: monets = 75; break;
-                  case 7: monets = 100; break;
-                  case 8: monets = 150; break;
-                  case 9: monets = 200; break;
-                  case 10: monets = 300; break;
-                  case 11: monets = 400; break;
-                  case 12: monets = 500; break;
-              }
-              var message = "Ответ верный! Вы заработали " + monets + " монет";
-              var coins = coinsGame + monets;
-              if (numQuest == 12) {
-                db.update({numQuest:0, coinsGame:0, chance:true,game:false, coinsAll:coins}, {where: {userId: userId}}).then((user)=>{
-                  sms(message, chatId, ip,function () {
-                    setTimeout(function () {
-                      sms("Вы выиграли! За эту игру Вы заработали " + coins + " монет.", chatId, ip, function () {
-                        setTimeout(function () {
-                          sms(allComands(), chatId, ip);
-                        },2000)
-                      });
-                    },2000)
-                  });
+            if (content == "Забрать") {
+              var message = "Вы решили выйти из игры. Вы заработали " + coinsGame + " монет."
+              db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll: coinsAll + coinsGame, help:true, anotherQuestion:true}, {where: {userId: userId}}).then((user)=>{
+                sms(message,chatId,ip, function () {
+                  setTimeout(function () {
+                    sms(allComands(), chatId, ip);
+                  },2000)
+                })
+              })
+            } else if (content=="Помощь") {
+              if (help) {
+                getQuestion(lastQuest).then((question)=>{
+                  var message = 'Эксперт считает, что правильный ответ: "' +question.r_answer + '".'
+                  db.update({ help:false}, {where: {userId: userId}}).then((user)=>{
+                    sms(message,chatId,ip)
+                  })
                 })
               } else {
+                var message = "Вы больше не можете использовать помощь эксперта."
+                sms(message, chatId, ip);
+              }
+            } else if (content == "Сменить") {
+              if (anotherQuestion) {
                 getQuestion(randomId([])).then((question)=>{
                   var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
-                  db.update({lastQuest:question.id ,rightAnswer:answers.index, numQuest:numQuest+1, coinsGame:coins}, {where: {userId: userId}}).then((user)=>{
+                  db.update({lastQuest:question.id ,rightAnswer:answers.index, anotherQuestion:false}, {where: {userId: userId}}).then((user)=>{
                     sms(message, chatId, ip,function () {
                       setTimeout(function () {
-                        sms(question.question+"\na) "+answers.array[0]+"\nb) "+answers.array[1]+"\nc) "+answers.array[2]+"\nd) "+answers.array[3], chatId, ip);
+                        sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
                       },2000)
                     });
                   })
                 });
+              } else {
+                var message = "За кон можно сменить только один вопрос."
+                sms(message, chatId, ip);
               }
             } else {
-              if (chance) {
-                var message = "Ответ неверный, но Вы можете ошибиться один раз за игру."
-                  db.update({chance:false}, {where: {userId: userId}}).then((user)=>{
-                    sms(message, chatId, ip)
+              var answerApplied;
+              switch(content) {
+                  case 'A': case 'a': answerApplied = 0; break;
+                  case 'B': case 'b': answerApplied = 1; break;
+                  case 'C': case 'c': answerApplied = 2; break;
+                  case 'D': case 'd': answerApplied = 3; break;
+              }
+              if (answerApplied == rightAnswer) {
+                var monets;
+                switch(numQuest) {
+                    case 1: monets = 5; break;
+                    case 2: monets = 10; break;
+                    case 3: monets = 15; break;
+                    case 4: monets = 30; break;
+                    case 5: monets = 50; break;
+                    case 6: monets = 75; break;
+                    case 7: monets = 100; break;
+                    case 8: monets = 150; break;
+                    case 9: monets = 200; break;
+                    case 10: monets = 300; break;
+                    case 11: monets = 400; break;
+                    case 12: monets = 500; break;
+                }
+                var message = "Ответ верный! Вы заработали " + monets + " монет";
+                var coins = coinsGame + monets;
+                if (numQuest == 12) {
+                  db.update({numQuest:0, coinsGame:0, chance:true,game:false, coinsAll:coins + coinsAll,help:true, anotherQuestion:true}, {where: {userId: userId}}).then((user)=>{
+                    sms(message, chatId, ip,function () {
+                      setTimeout(function () {
+                        sms("Вы выиграли! За эту игру Вы заработали " + coins + " монет.", chatId, ip, function () {
+                          setTimeout(function () {
+                            sms(allComands(), chatId, ip);
+                          },2000)
+                        });
+                      },2000)
+                    });
                   })
+                } else {
+                  getQuestion(randomId([])).then((question)=>{
+                    var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
+                    db.update({lastQuest:question.id ,rightAnswer:answers.index, numQuest:numQuest+1, coinsGame:coins}, {where: {userId: userId}}).then((user)=>{
+                      sms(message, chatId, ip,function () {
+                        setTimeout(function () {
+                          sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
+                        },2000)
+                      });
+                    })
+                  });
+                }
               } else {
-                var message = "Ответ неверный. Вы проиграли. За эту игру Вы заработали 0 монет."
-                db.update({ numQuest:0, chance:true, game:false, coinsGame:0}, {where: {userId: userId}}).then((user)=>{
-                  sms(message,chatId,ip, function () {
-                    setTimeout(function () {
-                      sms(allComands(), chatId, ip);
-                    },2000)
+                if (chance) {
+                  var message = "Ответ неверный, но Вы можете ошибиться один раз за игру."
+                    db.update({chance:false}, {where: {userId: userId}}).then((user)=>{
+                      sms(message, chatId, ip)
+                    })
+                } else {
+                  var message = "Ответ неверный. Вы проиграли. За эту игру Вы заработали 0 монет."
+                  db.update({ numQuest:0, chance:true, game:false, coinsGame:0,help:true, anotherQuestion:true}, {where: {userId: userId}}).then((user)=>{
+                    sms(message,chatId,ip, function () {
+                      setTimeout(function () {
+                        sms(allComands(), chatId, ip);
+                      },2000)
+                    })
                   })
-                })
+                }
               }
             }
           }
@@ -163,13 +204,13 @@ router.post("/", function(req, res, next) {
               db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1}, {where: {userId: userId}}).then(function(user) {
                 sms(message,chatId,ip,function () {
                   setTimeout(function () {
-                    sms(question.question+"\na) "+answers.array[0]+"\nb) "+answers.array[1]+"\nc) "+answers.array[2]+"\nd) "+answers.array[3], chatId, ip);
+                    sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
                   },2000)
                 })
               })
             });
           }
-          else if (content == "Помощь") {
+          else if (content == "Инфо") {
             sms("FAQ", chatId, ip);
           }
           else if (content == "Статистика"){
