@@ -50,7 +50,7 @@ router.post("/", function(req, res, next) {
     }
 
     var allComands = function () {
-      return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Инфо' - FAQ по игре.\n'Статистика' - позиция в игре."
+      return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Инфо' - FAQ по игре.\n'Стат' - позиция в игре."
     }
     var gameCommands = function (help,anotherQuestion,saveOption) {
       return  (help ? "\n'Помощь' - помощь эксперта" : "")+ (anotherQuestion ? "\n'Сменить' - другой вопрос" : "")+ (saveOption ? "\n'Сохранить' - застраховать сумму" : "") + "\n'Забрать' - выйти из игры с заработанными монетами "
@@ -250,7 +250,7 @@ router.post("/", function(req, res, next) {
           else if (content == "Инфо") {
             sms(rules(), chatId, ip);
           }
-          else if (content == "Статистика"){
+          else if (content == "Стат"){
             sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8", { type: sequelize.QueryTypes.SELECT}).then((results)=>{
               for (var i = 0; i < results.length; i++) {
                 if (results[i].userId == userId) {
