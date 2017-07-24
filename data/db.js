@@ -47,6 +47,10 @@ var user = sequelize.define("user", {
 		type: Sequelize.BOOLEAN,
 	    defaultValue: true
 	}
+	numberGames:{
+		type: Sequelize.INTEGER,
+	    defaultValue: 0
+	}
 })
 
 user.sync().then(function() {});

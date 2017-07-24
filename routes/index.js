@@ -50,14 +50,14 @@ router.post("/", function(req, res, next) {
     }
 
     var allComands = function () {
-      return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Инфо' - FAQ по игре.\n'Статистика' - позиция в игре.\n'Топ' - топ игроков."
+      return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Инфо' - FAQ по игре.\n'Статистика' - позиция в игре."
     }
     var gameCommands = function () {
       return "'Помощь' - помощь эксперта \n'Сменить' - другой вопрос \n'Забрать' - выйти из игры с заработанными монетами \n'Сохранить' - застраховать сумму"
     }
     var rules = function () {
       return "Походу игры Вам будет задано 12 вопросов, Вы должны будете выбрать правильные ответ из предложенных четырех вариантов. Используйте буквы 'А','Б','В','Г' на вашей клавиатуре для выбора ответа." +
-      "Можно сменить вопрос, отправив 'Сменить', застраховать сумму, отправив 'Сохранить', попросить помощи у эксперта, отправив 'Помощь' или забрать заработанные монеты, отправив 'Забрать' в чат. Один раз за кон Вы можете ошибиться."
+      "Можно сменить вопрос, отправив 'Сменить', застраховать сумму, отправив 'Сохранить', попросить помощи у эксперта, отправив 'Помощь' или забрать заработанные монеты, отправив 'Забрать' в чат. Эксперт может иногда ошибаться. Один раз за кон Вы можете ошибиться."
     }
 
     if(event == "user/unfollow") {
@@ -93,6 +93,7 @@ router.post("/", function(req, res, next) {
         var anotherQuestion = user.anotherQuestion;
         var saveOption = user.saveOption;
         var saveAmount = user.saveAmount;
+        var numberGames = user.numberGames;
         //var askedQuest = user.askedQuest;
       	if(req.body.data.type != 'text/plain') {
       		console.log(errMessage);
@@ -119,7 +120,14 @@ router.post("/", function(req, res, next) {
             } else if (content=="Помощь") {
               if (help) {
                 getQuestion(lastQuest).then((question)=>{
-                  var message = 'Эксперт считает, что правильный ответ: "' + question.r_answer + '".'
+                  var answer;
+                  var x = Math.floor((Math.random() * 100) + 1);
+                  if (x>90){
+                    answer = question.w_answer1;
+                  } else {
+                    answer = question.r_answer;
+                  }
+                  var message = 'Эксперт считает, что правильный ответ: "' + answer + '".'
                   db.update({ help:false}, {where: {userId: userId}}).then((user)=>{
                     sms(message,chatId,ip)
                   })
@@ -230,7 +238,7 @@ router.post("/", function(req, res, next) {
             var message = 'Игра началась!'
             getQuestion(randomId([])).then((question)=>{
               var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
-              db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1,saveAmount:0}, {where: {userId: userId}}).then(function(user) {
+              db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1,saveAmount:0,numberGames:numberGames + 1}, {where: {userId: userId}}).then(function(user) {
                 sms(message,chatId,ip,function () {
                   setTimeout(function () {
                     sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3] + "\n" + gameCommands(), chatId, ip);
