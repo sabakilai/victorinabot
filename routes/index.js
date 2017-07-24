@@ -129,10 +129,10 @@ router.post("/", function(req, res, next) {
             } else {
               var answerApplied;
               switch(content) {
-                  case 'A': case 'a': answerApplied = 0; break;
-                  case 'B': case 'b': answerApplied = 1; break;
-                  case 'C': case 'c': answerApplied = 2; break;
-                  case 'D': case 'd': answerApplied = 3; break;
+                  case 'А': case 'а': answerApplied = 0; break;
+                  case 'Б': case 'б': answerApplied = 1; break;
+                  case 'В': case 'в': answerApplied = 2; break;
+                  case 'Г': case 'г': answerApplied = 3; break;
               }
               if (answerApplied == rightAnswer) {
                 var monets;
