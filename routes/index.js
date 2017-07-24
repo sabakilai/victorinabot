@@ -239,7 +239,7 @@ router.post("/", function(req, res, next) {
             sms(rules(), chatId, ip);
           }
           else if (content == "Статистика"){
-            db.findAll({ order: '"coinsAll" DESC' }).then((results)=>{
+            db.findAndCountAll({ order: '"coinsAll" DESC' }).then((results)=>{
               async.each(results, function(result,callback){
                 console.log(result.count);
                 console.log(result.rows);
