@@ -80,6 +80,8 @@ router.post("/", function(req, res, next) {
         var coinsGame = user.coinsGame;
         var help = user.help;
         var anotherQuestion = user.anotherQuestion;
+        var save = user.save;
+        var saveAmount = user.saveAmount;
         //var askedQuest = user.askedQuest;
       	if(req.body.data.type != 'text/plain') {
       		console.log(errMessage);
@@ -90,18 +92,23 @@ router.post("/", function(req, res, next) {
           var correctAnswer = ["А","а","Б","б","В","в","Г","г", "Забрать", "Помощь", "Сменить"];
           if (correctAnswer.indexOf(content)>= 0) {
             if (content == "Забрать") {
-              var message = "Вы решили выйти из игры. Вы заработали " + coinsGame + " монет."
-              db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll: coinsAll + coinsGame, help:true, anotherQuestion:true}, {where: {userId: userId}}).then((user)=>{
-                sms(message,chatId,ip, function () {
-                  setTimeout(function () {
-                    sms(allComands(), chatId, ip);
-                  },2000)
+              if (coinsGame!=0) {
+                var message = "Вы решили выйти из игры. Вы заработали " + coinsGame + " монет."
+                db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll: coinsAll + coinsGame, help:true, anotherQuestion:true, save:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
+                  sms(message,chatId,ip, function () {
+                    setTimeout(function () {
+                      sms(allComands(), chatId, ip);
+                    },2000)
+                  })
                 })
-              })
+              } else {
+                var message = "Вы еще не заработали монет";
+                sms(message,chatId,ip);
+              }
             } else if (content=="Помощь") {
               if (help) {
                 getQuestion(lastQuest).then((question)=>{
-                  var message = 'Эксперт считает, что правильный ответ: "' +question.r_answer + '".'
+                  var message = 'Эксперт считает, что правильный ответ: "' + question.r_answer + '".'
                   db.update({ help:false}, {where: {userId: userId}}).then((user)=>{
                     sms(message,chatId,ip)
                   })
@@ -121,6 +128,21 @@ router.post("/", function(req, res, next) {
               } else {
                 var message = "За кон можно сменить только один вопрос."
                 sms(message, chatId, ip);
+              }
+            } else if (content=="Сохранить") {
+              if (coinsGame!=0) {
+                if (save) {
+                  var message = 'Вы сохранили ' + coinsGame + ' монет.'
+                  db.update({ save:false, saveAmount: coinsGame}, {where: {userId: userId}}).then((user)=>{
+                    sms(message,chatId,ip)
+                  })
+                } else {
+                  var message = "За кон сохранить сумму можно только один раз.";
+                  sms(message,chatId,ip);
+                }
+              } else {
+                var message = "Вы еще не заработали монет";
+                sms(message,chatId,ip);
               }
             } else {
               var answerApplied;
@@ -149,7 +171,7 @@ router.post("/", function(req, res, next) {
                 var message = "Ответ верный! Вы заработали " + monets + " монет";
                 var coins = coinsGame + monets;
                 if (numQuest == 12) {
-                  db.update({numQuest:0, coinsGame:0, chance:true,game:false, coinsAll:coins + coinsAll,help:true, anotherQuestion:true}, {where: {userId: userId}}).then((user)=>{
+                  db.update({numQuest:0, coinsGame:0, chance:true,game:false, coinsAll:coins + coinsAll,help:true, anotherQuestion:true, save:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
                     sms(message, chatId, ip,function () {
                       setTimeout(function () {
                         sms("Вы выиграли! За эту игру Вы заработали " + coins + " монет.", chatId, ip, function () {
@@ -179,8 +201,8 @@ router.post("/", function(req, res, next) {
                       sms(message, chatId, ip)
                     })
                 } else {
-                  var message = "Ответ неверный. Вы проиграли. За эту игру Вы заработали 0 монет."
-                  db.update({ numQuest:0, chance:true, game:false, coinsGame:0,help:true, anotherQuestion:true}, {where: {userId: userId}}).then((user)=>{
+                  var message = "Ответ неверный. Вы проиграли. За эту игру Вы заработали "+ saveAmount +" монет."
+                  db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll:coinsAll + saveAmount, help:true, anotherQuestion:true, save:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
                     sms(message,chatId,ip, function () {
                       setTimeout(function () {
                         sms(allComands(), chatId, ip);
@@ -197,7 +219,7 @@ router.post("/", function(req, res, next) {
             var message = 'Игра началась!'
             getQuestion(randomId([])).then((question)=>{
               var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
-              db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1}, {where: {userId: userId}}).then(function(user) {
+              db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1,saveAmount:0}, {where: {userId: userId}}).then(function(user) {
                 sms(message,chatId,ip,function () {
                   setTimeout(function () {
                     sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
@@ -211,9 +233,6 @@ router.post("/", function(req, res, next) {
           }
           else if (content == "Статистика"){
             sms("Users stat", chatId, ip);
-          }
-          else if (content == "Топ") {
-            sms("TOP - 5", chatId, ip);
           } else {
       		sms(errMessage, chatId, ip);
           }

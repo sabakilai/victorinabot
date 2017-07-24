@@ -38,6 +38,14 @@ var user = sequelize.define("user", {
 	anotherQuestion:{
 		type: Sequelize.BOOLEAN,
 	    defaultValue: true
+	},
+	saveAmount:{
+		type: Sequelize.INTEGER,
+	    defaultValue: 0
+	},
+	save:{
+		type: Sequelize.BOOLEAN,
+	    defaultValue: true
 	}
 })
 
