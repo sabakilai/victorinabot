@@ -89,7 +89,7 @@ router.post("/", function(req, res, next) {
       		return;
       	}
         if (user.game){
-          var correctAnswer = ["А","а","Б","б","В","в","Г","г", "Забрать", "Помощь", "Сменить"];
+          var correctAnswer = ["А","а","Б","б","В","в","Г","г", "Забрать", "Помощь", "Сменить","Сохранить"];
           if (correctAnswer.indexOf(content)>= 0) {
             if (content == "Забрать") {
               if (coinsGame!=0) {
