@@ -80,7 +80,7 @@ router.post("/", function(req, res, next) {
         var coinsGame = user.coinsGame;
         var help = user.help;
         var anotherQuestion = user.anotherQuestion;
-        var save = user.save;
+        var saveOption = user.saveOption;
         var saveAmount = user.saveAmount;
         //var askedQuest = user.askedQuest;
       	if(req.body.data.type != 'text/plain') {
@@ -94,7 +94,7 @@ router.post("/", function(req, res, next) {
             if (content == "Забрать") {
               if (coinsGame!=0) {
                 var message = "Вы решили выйти из игры. Вы заработали " + coinsGame + " монет."
-                db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll: coinsAll + coinsGame, help:true, anotherQuestion:true, save:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
+                db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll: coinsAll + coinsGame, help:true, anotherQuestion:true, saveOption:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
                   sms(message,chatId,ip, function () {
                     setTimeout(function () {
                       sms(allComands(), chatId, ip);
@@ -131,9 +131,9 @@ router.post("/", function(req, res, next) {
               }
             } else if (content=="Сохранить") {
               if (coinsGame!=0) {
-                if (save) {
+                if (saveOption) {
                   var message = 'Вы сохранили ' + coinsGame + ' монет.'
-                  db.update({ save:false, saveAmount: coinsGame}, {where: {userId: userId}}).then((user)=>{
+                  db.update({ saveOption:false, saveAmount: coinsGame}, {where: {userId: userId}}).then((user)=>{
                     sms(message,chatId,ip)
                   })
                 } else {
@@ -171,7 +171,7 @@ router.post("/", function(req, res, next) {
                 var message = "Ответ верный! Вы заработали " + monets + " монет";
                 var coins = coinsGame + monets;
                 if (numQuest == 12) {
-                  db.update({numQuest:0, coinsGame:0, chance:true,game:false, coinsAll:coins + coinsAll,help:true, anotherQuestion:true, save:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
+                  db.update({numQuest:0, coinsGame:0, chance:true,game:false, coinsAll:coins + coinsAll,help:true, anotherQuestion:true, saveOption:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
                     sms(message, chatId, ip,function () {
                       setTimeout(function () {
                         sms("Вы выиграли! За эту игру Вы заработали " + coins + " монет.", chatId, ip, function () {
@@ -202,7 +202,7 @@ router.post("/", function(req, res, next) {
                     })
                 } else {
                   var message = "Ответ неверный. Вы проиграли. За эту игру Вы заработали "+ saveAmount +" монет."
-                  db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll:coinsAll + saveAmount, help:true, anotherQuestion:true, save:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
+                  db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll:coinsAll + saveAmount, help:true, anotherQuestion:true, saveOption:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
                     sms(message,chatId,ip, function () {
                       setTimeout(function () {
                         sms(allComands(), chatId, ip);

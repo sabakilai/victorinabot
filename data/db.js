@@ -43,7 +43,7 @@ var user = sequelize.define("user", {
 		type: Sequelize.INTEGER,
 	    defaultValue: 0
 	},
-	save:{
+	saveOption:{
 		type: Sequelize.BOOLEAN,
 	    defaultValue: true
 	}
