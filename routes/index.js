@@ -241,7 +241,7 @@ router.post("/", function(req, res, next) {
           }
           else if (content == "Статистика"){
 
-            db.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8", { type: db.QueryTypes.SELECT}).then((results)=>{
+            db.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8").then((results)=>{
               async.each(results, function(result,callback){
                 console.log(result.idea);
               })
