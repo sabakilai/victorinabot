@@ -48,6 +48,9 @@ router.post("/", function(req, res, next) {
     var allComands = function () {
       return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Инфо' - FAQ по игре.\n'Статистика' - позиция в игре.\n'Топ' - топ игроков."
     }
+    var gameCommands = function () {
+      return "'Помощь' - помощь эксперта, 'Сменить' - другой вопрос, 'Забрать' - выйти из игры с выйгранными монетами, 'Сохранить' - застраховать сумму"
+    }
 
     if(event == "user/unfollow") {
     	var userId = req.body.data.id;
@@ -222,7 +225,7 @@ router.post("/", function(req, res, next) {
               db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1,saveAmount:0}, {where: {userId: userId}}).then(function(user) {
                 sms(message,chatId,ip,function () {
                   setTimeout(function () {
-                    sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3], chatId, ip);
+                    sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3] + "\n" + gameCommands(), chatId, ip);
                   },2000)
                 })
               })
