@@ -246,7 +246,7 @@ router.post("/", function(req, res, next) {
 
             sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8").then((results)=>{
               async.each(results, function(result,callback){
-                console.log(result.idea);
+                console.log('i - ' + result.i);
               })
             })
             sms("Users stat", chatId, ip);
