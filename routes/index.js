@@ -50,14 +50,14 @@ router.post("/", function(req, res, next) {
     }
 
     var allComands = function () {
-      return "Пришлите мне одну из команд: \n'Играть' - начать играть.\n'Инфо' - FAQ по игре.\n'Стат' - позиция в игре."
+      return "Пришлите мне одну из команд: \n'1' - начать играть.\n'2' - FAQ по игре.\n'3' - позиция в игре."
     }
     var gameCommands = function (help,anotherQuestion,saveOption) {
-      return  (help ? "\n'Помощь' - помощь эксперта" : "")+ (anotherQuestion ? "\n'Сменить' - другой вопрос" : "")+ (saveOption ? "\n'Сохранить' - застраховать сумму" : "") + "\n'Забрать' - выйти из игры с заработанными монетами "
+      return  (help ? "\n'Э' - помощь эксперта" : "")+ (anotherQuestion ? "\n'С' - другой вопрос" : "")+ (saveOption ? "\n'З' - застраховать сумму" : "") + "\n'М' - выйти из игры с заработанными монетами "
     }
     var rules = function () {
-      return "Походу игры Вам будет задано 12 вопросов, Вы должны будете выбрать правильные ответ из предложенных четырех вариантов. Используйте буквы 'А','Б','В','Г' на вашей клавиатуре для выбора ответа." +
-      " Можно сменить вопрос, отправив 'Сменить' в чат, застраховать сумму - 'Сохранить', попросить помощи у эксперта - 'Помощь' или забрать заработанные монеты - 'Забрать'. \nЭксперт может иногда ошибаться. \nОдин раз за кон Вы можете ошибиться."
+      return "Походу игры Вам будет задано 12 вопросов, Вы должны будете выбрать правильные ответ из предложенных четырех вариантов. Используйте буквы '1','2','3','4' на вашей клавиатуре для выбора ответа." +
+      " Можно сменить вопрос, отправив 'С' в чат, застраховать сумму - 'З', попросить помощи у эксперта - 'Э' или забрать заработанные монеты - 'М'. \nЭксперт может иногда ошибаться. \nОдин раз за кон Вы можете ошибиться."
     }
 
     if(event == "user/unfollow") {
@@ -101,9 +101,9 @@ router.post("/", function(req, res, next) {
       		return;
       	}
         if (user.game){
-          var correctAnswer = ["А","а","Б","б","В","в","Г","г", "Забрать", "Помощь", "Сменить","Сохранить"];
+          var correctAnswer = ["1","2","3","4", "М", "Э", "С","З"];
           if (correctAnswer.indexOf(content)>= 0) {
-            if (content == "Забрать") {
+            if (content == "М") {
               if (coinsGame!=0) {
                 var message = "Вы решили выйти из игры. Вы заработали " + coinsGame + " монет."
                 db.update({ numQuest:0, chance:true, game:false, coinsGame:0, coinsAll: coinsAll + coinsGame, help:true, anotherQuestion:true, saveOption:true, saveAmount:0}, {where: {userId: userId}}).then((user)=>{
@@ -117,7 +117,7 @@ router.post("/", function(req, res, next) {
                 var message = "Вы еще не заработали монет";
                 sms(message,chatId,ip);
               }
-            } else if (content=="Помощь") {
+            } else if (content=="Э") {
               if (help) {
                 getQuestion(lastQuest).then((question)=>{
                   var answer;
@@ -136,19 +136,19 @@ router.post("/", function(req, res, next) {
                 var message = "Вы больше не можете использовать помощь эксперта."
                 sms(message, chatId, ip);
               }
-            } else if (content == "Сменить") {
+            } else if (content == "С") {
               if (anotherQuestion) {
                 getQuestion(randomId([])).then((question)=>{
                   var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
                   db.update({lastQuest:question.id ,rightAnswer:answers.index, anotherQuestion:false}, {where: {userId: userId}}).then((user)=>{
-                    sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3] + "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
+                    sms(question.question+"\n1) "+answers.array[0]+"\n2) "+answers.array[1]+"\n3) "+answers.array[2]+"\n4) "+answers.array[3] + "\n" + gameCommands(help,!anotherQuestion,saveOption), chatId, ip);
                   })
                 });
               } else {
                 var message = "За кон можно сменить только один вопрос."
                 sms(message, chatId, ip);
               }
-            } else if (content=="Сохранить") {
+            } else if (content=="З") {
               if (coinsGame!=0) {
                 if (saveOption) {
                   var message = 'Вы сохранили ' + coinsGame + ' монет.'
@@ -166,10 +166,10 @@ router.post("/", function(req, res, next) {
             } else {
               var answerApplied;
               switch(content) {
-                  case 'А': case 'а': answerApplied = 0; break;
-                  case 'Б': case 'б': answerApplied = 1; break;
-                  case 'В': case 'в': answerApplied = 2; break;
-                  case 'Г': case 'г': answerApplied = 3; break;
+                  case '1': answerApplied = 0; break;
+                  case '2': answerApplied = 1; break;
+                  case '3': answerApplied = 2; break;
+                  case '4': answerApplied = 3; break;
               }
               if (answerApplied == rightAnswer) {
                 var monets;
@@ -207,7 +207,7 @@ router.post("/", function(req, res, next) {
                     db.update({lastQuest:question.id ,rightAnswer:answers.index, numQuest:numQuest+1, coinsGame:coins}, {where: {userId: userId}}).then((user)=>{
                       sms(message, chatId, ip,function () {
                         setTimeout(function () {
-                          sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3]+ "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
+                          sms(question.question+"\n1) "+answers.array[0]+"\n2) "+answers.array[1]+"\n3) "+answers.array[2]+"\n4) "+answers.array[3]+ "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
                         },2000)
                       });
                     })
@@ -234,23 +234,23 @@ router.post("/", function(req, res, next) {
           }
         } else {
           var errMessage = "Некорректный ввод. " + allComands();
-          if(content == "Играть"){
+          if(content == "1"){
             var message = 'Игра началась!'
             getQuestion(randomId([])).then((question)=>{
               var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
               db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1,saveAmount:0,numberGames:numberGames + 1}, {where: {userId: userId}}).then(function(user) {
                 sms(message,chatId,ip,function () {
                   setTimeout(function () {
-                    sms(question.question+"\nА) "+answers.array[0]+"\nБ) "+answers.array[1]+"\nВ) "+answers.array[2]+"\nГ) "+answers.array[3] + "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
+                    sms(question.question+"\n1) "+answers.array[0]+"\n2) "+answers.array[1]+"\n3) "+answers.array[2]+"\n4) "+answers.array[3] + "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
                   },2000)
                 })
               })
             });
           }
-          else if (content == "Инфо") {
+          else if (content == "2") {
             sms(rules(), chatId, ip);
           }
-          else if (content == "Стат"){
+          else if (content == "3"){
             sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8", { type: sequelize.QueryTypes.SELECT}).then((results)=>{
               for (var i = 0; i < results.length; i++) {
                 if (results[i].userId == userId) {
