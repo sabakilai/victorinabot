@@ -50,13 +50,13 @@ router.post("/", function(req, res, next) {
     }
 
     var allComands = function () {
-      return "Пришлите мне одну из команд: \n'1' - начать играть.\n'2' - FAQ по игре.\n'3' - позиция в игре."
+      return "Пришлите мне одну из команд: \n1️⃣  - начать играть.\n2️⃣  - FAQ по игре.\n3️⃣  - позиция в игре."
     }
     var gameCommands = function (help,anotherQuestion,saveOption) {
       return  (help ? "\n'Э' - помощь эксперта" : "")+ (anotherQuestion ? "\n'С' - другой вопрос" : "")+ (saveOption ? "\n'З' - застраховать сумму" : "") + "\n'М' - выйти из игры с заработанными монетами "
     }
     var rules = function () {
-      return "Походу игры Вам будет задано 12 вопросов, Вы должны будете выбрать правильные ответ из предложенных четырех вариантов. Используйте буквы '1','2','3','4' на вашей клавиатуре для выбора ответа." +
+      return "Походу игры Вам будет задано 12 вопросов, Вы должны будете выбрать правильные ответ из предложенных четырех вариантов. Используйте 1️⃣ ,2️⃣ ,3️⃣ ,4️⃣  на вашей клавиатуре для выбора ответа." +
       " Можно сменить вопрос, отправив 'С' в чат, застраховать сумму - 'З', попросить помощи у эксперта - 'Э' или забрать заработанные монеты - 'М'. \nЭксперт может иногда ошибаться. \nОдин раз за кон Вы можете ошибиться."
     }
 
@@ -141,7 +141,7 @@ router.post("/", function(req, res, next) {
                 getQuestion(randomId([])).then((question)=>{
                   var answers = shuffle([question.w_answer1,question.w_answer2,question.w_answer3,question.r_answer]);
                   db.update({lastQuest:question.id ,rightAnswer:answers.index, anotherQuestion:false}, {where: {userId: userId}}).then((user)=>{
-                    sms(question.question+"\n1) "+answers.array[0]+"\n2) "+answers.array[1]+"\n3) "+answers.array[2]+"\n4) "+answers.array[3] + "\n" + gameCommands(help,!anotherQuestion,saveOption), chatId, ip);
+                    sms(question.question+"\n1️⃣  "+answers.array[0]+"\n2️⃣  "+answers.array[1]+"\n3️⃣  "+answers.array[2]+"\n4️⃣  "+answers.array[3] + "\n" + gameCommands(help,!anotherQuestion,saveOption), chatId, ip);
                   })
                 });
               } else {
@@ -207,7 +207,7 @@ router.post("/", function(req, res, next) {
                     db.update({lastQuest:question.id ,rightAnswer:answers.index, numQuest:numQuest+1, coinsGame:coins}, {where: {userId: userId}}).then((user)=>{
                       sms(message, chatId, ip,function () {
                         setTimeout(function () {
-                          sms(question.question+"\n1) "+answers.array[0]+"\n2) "+answers.array[1]+"\n3) "+answers.array[2]+"\n4) "+answers.array[3]+ "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
+                          sms(question.question+"\n1️⃣  "+answers.array[0]+"\n2️⃣  "+answers.array[1]+"\n3️⃣  "+answers.array[2]+"\n4️⃣  "+answers.array[3]+ "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
                         },2000)
                       });
                     })
@@ -241,7 +241,7 @@ router.post("/", function(req, res, next) {
               db.update({game: true, lastQuest:question.id , rightAnswer:answers.index, numQuest:1,saveAmount:0,numberGames:numberGames + 1}, {where: {userId: userId}}).then(function(user) {
                 sms(message,chatId,ip,function () {
                   setTimeout(function () {
-                    sms(question.question+"\n1) "+answers.array[0]+"\n2) "+answers.array[1]+"\n3) "+answers.array[2]+"\n4) "+answers.array[3] + "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
+                    sms(question.question+"\n1️⃣  "+answers.array[0]+"\n2️⃣  "+answers.array[1]+"\n3️⃣  "+answers.array[2]+"\n4️⃣  "+answers.array[3] + "\n" + gameCommands(help,anotherQuestion,saveOption), chatId, ip);
                   },2000)
                 })
               })
