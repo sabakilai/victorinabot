@@ -251,7 +251,7 @@ router.post("/", function(req, res, next) {
             sms(rules(), chatId, ip);
           }
           else if (content == "3"){
-            sequelize.query("select t.*, row_number() OVER (ORDER BY 8) AS i from users t order by 8", { type: sequelize.QueryTypes.SELECT}).then((results)=>{
+            sequelize.query("select t.*, row_number() OVER () as i from (select * from users t order by 9 desc) t", { type: sequelize.QueryTypes.SELECT}).then((results)=>{
               for (var i = 0; i < results.length; i++) {
                 if (results[i].userId == userId) {
                   var message = "Ваша позиция: " + results[i].i + "\nКоличество монет: " + results[i].coinsAll + "\nКоличество игр: " + results[i].numberGames
