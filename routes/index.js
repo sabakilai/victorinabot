@@ -71,6 +71,9 @@ router.post("/", function(req, res, next) {
       db.create({userId: userId, ip: ip}).then(function(user) {
         console.log("user follows");
         newChat(userId, ip, function(err, res, body) {
+					if(err) {
+						console.log(err)
+					}
           var chatId = body.data.id;
           var message = "Добро пожаловать на викторину!\n\n" + allComands();
           sms(message, chatId, ip);
