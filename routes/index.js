@@ -53,7 +53,7 @@ router.post("/", function(req, res, next) {
     }
 
     var allComands = function () {
-      return "Пришлите одну из команд: \n1️⃣  начать тест.\n2️⃣  FAQ по игре.\n3️⃣  позиция в игре."
+      return "Пришлите одну из команд: \n1️⃣  Начать тест.\n2️⃣  FAQ по игре.\n3️⃣  Позиция в игре."
     }
     var gameCommands = function (help,anotherQuestion,saveOption) {
       return  (help ? "\n'Э' - помощь эксперта" : "")+ (anotherQuestion ? "\n'С' - другой вопрос" : "")+ (saveOption ? "\n'З' - застраховать сумму" : "") + "\n'М' - выйти из игры с заработанными монетами "
