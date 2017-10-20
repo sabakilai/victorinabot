@@ -53,7 +53,7 @@ router.post("/", function(req, res, next) {
     }
 
     var allComands = function () {
-      return "Пришлите мне одну из команд: \n1️⃣  - начать играть.\n2️⃣  - FAQ по игре.\n3️⃣  - позиция в игре."
+      return "Пришлите одну из команд: \n1️⃣  начать тест.\n2️⃣  FAQ по игре.\n3️⃣  позиция в игре."
     }
     var gameCommands = function (help,anotherQuestion,saveOption) {
       return  (help ? "\n'Э' - помощь эксперта" : "")+ (anotherQuestion ? "\n'С' - другой вопрос" : "")+ (saveOption ? "\n'З' - застраховать сумму" : "") + "\n'М' - выйти из игры с заработанными монетами "
@@ -78,7 +78,7 @@ router.post("/", function(req, res, next) {
 						console.log(err)
 					}
           var chatId = body.data.id;
-          var message = "Добро пожаловать на викторину!\n\n" + allComands();
+          var message = "Добро пожаловать!\nВикторина - это игра в вопросы-ответы по разным тематикам. Играйте и зарабатывайте монеты!\n" + allComands();
           sms(message, chatId, ip);
         })
       });
@@ -221,7 +221,7 @@ router.post("/", function(req, res, next) {
                 }
               } else {
                 if (chance) {
-                  var message = "Ответ неверный, но Вы можете ошибиться один раз за игру."
+                  var message = "Ответ неверный, но у вас есть еще одна попытка. Продолжаем"
                     db.update({chance:false}, {where: {userId: userId}}).then((user)=>{
                       sms(message, chatId, ip)
                     })
