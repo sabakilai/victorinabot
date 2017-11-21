@@ -265,7 +265,11 @@ router.post("/", function(req, res, next) {
                 }
               }
             })
-          } else {
+          } 
+          else if (content == "Старт") {
+            sms(allComands(), chatId, ip);
+          }
+          else {
       		sms(errMessage, chatId, ip);
           }
         }
